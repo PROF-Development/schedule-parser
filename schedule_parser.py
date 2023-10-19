@@ -1,6 +1,8 @@
-import pdfplumber
 import re
 import datetime
+
+import pdfplumber
+
 
 class Parser(object):
     def __init__(self):
