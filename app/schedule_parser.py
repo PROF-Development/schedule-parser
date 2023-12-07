@@ -3,41 +3,51 @@ import datetime
 import pdfplumber
 
 
-class Parser():
+class Parser:
     lesson_regex = re.compile(
         r'(.*?)\. (.*?) ?(лекции|семинар|лабораторные занятия)(.*?)\. ([^\.]*?)\.? \[(.*?)\]')
     dates_regex = re.compile(r'(\d{2})\.(\d{2})-(\d{2})\.(\d{2}) (ч.н.|к.н.)')
     single_date_regex = re.compile(r'(\d{2})\.(\d{2})')
     subgroup_regex = re.compile(r'\((А|Б)\)')
+    times = ['8:30 - 10:10', '10:20 - 12:00', '12:20 - 14:00',
+             '14:10 - 15:50', '16:00 - 17:40', '18:00 - 19:30',
+             '19:40 - 21:10', '21:20 - 22:50']
 
-    def parse(self, path: str) -> list:
-        table = pdfplumber.open(path).pages[0].extract_table()
-        self.times = table[0]
+    def parse(self) -> list:
         result = [elem for row in [self.items(
-            elem, time) for row in table for time, elem in enumerate(row)] for elem in row]
+            elem, time) for row in self.table for time, elem in enumerate(row)] for elem in row]
         return result
 
-    def items(self, object: str, time_index: str):
+    def read(self, path: str):
+        try:
+            self.table = pdfplumber.open(path).pages[0].extract_table()
+            return 1
+        except:
+            return -1
+
+    @classmethod
+    def items(cls, object: str, time_index: int = 0):
         lessons = []
         if object:
-            while res := self.lesson_regex.search(object.replace('\n', ' ')):
+            while res := cls.lesson_regex.search(object.replace('\n', ' ')):
                 groups = res.groups()
-                time = self.times[time_index]
+                time = cls.times[time_index-1]
                 lesson = groups[0]
-                professor = groups[1]
+                professor = groups[1] if groups[1] != '' else None
                 type = groups[2]
-                auditory = groups[4]
+                auditory = groups[4] if groups[4] != '' else None
                 dates = groups[5]
-                subgroup = self.subgroup_regex.search(groups[3])
-                if subgroup:
-                    subgroup = subgroup[0]
-                else:
-                    subgroup = None
+                subgroup = cls.subgroup_regex.search(groups[3])
+                subgroup = subgroup[0] if subgroup else None
                 if 'лабораторные занятия' in groups[2]:
-                    time = self.times[time_index].split(
-                        '-')[0] + '-' + self.times[time_index+1].split('-')[1]
-                lessons.extend([(date, time, lesson, professor, type,
-                               subgroup, auditory) for date in self.parse_date(dates)])
+                    time = cls.times[time_index-1].split(
+                        '-')[0] + '-' + cls.times[time_index].split('-')[1]
+                if time_index:
+                    lessons.extend([(date, time, lesson, professor, type,
+                                     subgroup, auditory) for date in cls.parse_date(dates)])
+                else:
+                    lessons.extend([(date, lesson, professor, type,
+                                     subgroup, auditory) for date in cls.parse_date(dates)])
                 object = object[res.end()+1:]
         return lessons
 
