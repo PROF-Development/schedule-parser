@@ -4,6 +4,11 @@ from app.schedule_parser import Parser
 from app.schemas.lesson import Lesson
 
 
+def create_date(dat: str) -> date:
+    day, month = map(int, dat.split('.'))
+    return date.today().replace(month=month, day=day)
+
+
 def test_pdf_reading():
     parser = Parser()
     path_to_mock_pdf = 'test.pdf'
@@ -49,11 +54,6 @@ def test_pdf_parsing():
     for lesson in result:
         assert lesson.professor != ''
         assert lesson.auditory != ''
-
-
-def create_date(dat: str) -> date:
-    day, month = map(int, dat.split('.'))
-    return date.today().replace(month=month, day=day)
 
 
 def test_date_parsing():

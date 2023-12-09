@@ -20,5 +20,5 @@ class Lesson:
     @field_validator('time')
     def validate_time(cls, v):
         if not re.match(r'\d{1,2}:\d{2} - \d{2}:\d{2}',v):
-            raise ValueError('Time must like 12:34 - 12:34')
+            raise ValueError('Time format must fit HH:MM - HH:MM')
         return v
