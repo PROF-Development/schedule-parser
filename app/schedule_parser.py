@@ -18,15 +18,15 @@ class Parser:
             elem, time) for row in self.table for time, elem in enumerate(row)] for elem in row]
         return result
 
-    def read(self, path: str):
+    def read(self, path: str) -> bool:
         try:
             self.table = pdfplumber.open(path).pages[0].extract_table()
-            return 1
+            return True
         except:
-            return -1
+            return False
 
     @classmethod
-    def items(cls, object: str, time_index: int = 0):
+    def items(cls, object: str, time_index: int = 0) -> list:
         lessons = []
         if object:
             while res := cls.lesson_regex.search(object.replace('\n', ' ')):
@@ -38,7 +38,7 @@ class Parser:
                 auditory = groups[4] if groups[4] != '' else None
                 dates = groups[5]
                 subgroup = cls.subgroup_regex.search(groups[3])
-                subgroup = subgroup[0] if subgroup else None
+                subgroup = subgroup[1] if subgroup else None
                 if 'лабораторные занятия' in groups[2]:
                     time = cls.times[time_index-1].split(
                         '-')[0] + '-' + cls.times[time_index].split('-')[1]
@@ -52,7 +52,7 @@ class Parser:
         return lessons
 
     @classmethod
-    def parse_date(cls, date: str):
+    def parse_date(cls, date: str) -> list:
         dates = date.split(',')
         result_dates = []
         for el in dates:
