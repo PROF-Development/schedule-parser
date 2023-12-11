@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "Schedule Parser"
+name = "schedule-parser"
 version = "0.10.0"
 description = "A basic schedule parser from pdf files"
 authors = ["PROF-Development"]
