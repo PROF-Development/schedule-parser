@@ -1,9 +1,14 @@
 [tool.poetry]
-name = "parser"
+name = "Schedule Parser"
 version = "0.1.0"
-description = ""
-authors = []
+description = "A basic schedule parser from pdf files"
+authors = ["PROF-Development"]
 readme = "README.md"
+homepage = "https://github.com/PROF-Development/schedule-parser"
+repository = "https://github.com/PROF-Development/schedule-parser.git"
+packages = [
+    { include = "schedule_parser" }
+]
 
 [tool.poetry.dependencies]
 python = "^3.12"
