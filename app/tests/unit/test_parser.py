@@ -20,7 +20,6 @@ def test_pdf_parsing():
     path_to_mock_pdf = 'test.pdf'
     parser.read(path_to_mock_pdf)
     result = [Lesson(*lesson) for lesson in parser.parse()]
-    print(parser.parse())
     test_lessons = ['Проектирование информационных систем',
                     'Методы и алгоритмы теории игр',
                     'DevOps',
