@@ -68,5 +68,3 @@ class Parser:
                 result_dates.append(datetime.date.today().replace(
                     month=int(groups[1]), day=int(groups[0])))
         return result_dates
-
-version = "0.10.0"
