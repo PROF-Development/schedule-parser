@@ -5,7 +5,7 @@ import pdfplumber
 
 class Parser:
     lesson_regex = re.compile(
-        r'(.*?)\. (.*?) ?(лекции|семинар|лабораторные занятия)(.*?)\. ([^\.]*?)\.? \[(.*?)\]')
+        r'(.*?) ?([А-Я][^.]+ [А-Я]\.(?:[А-Я]\.)?)? (лекции|семинар|лабораторные занятия)(.*?)\. ([^\.]*?)\.? \[(.*?)\]')
     dates_regex = re.compile(r'(\d{2})\.(\d{2})-(\d{2})\.(\d{2}) (ч.н.|к.н.)')
     single_date_regex = re.compile(r'(\d{2})\.(\d{2})')
     subgroup_regex = re.compile(r'\((А|Б)\)')
@@ -32,7 +32,7 @@ class Parser:
             while res := cls.lesson_regex.search(object.replace('\n', ' ')):
                 groups = res.groups()
                 time = cls.times[time_index-1]
-                lesson = groups[0]
+                lesson = groups[0][0:-1]
                 professor = groups[1] if groups[1] != '' else None
                 type = groups[2]
                 auditory = groups[4] if groups[4] != '' else None
@@ -70,3 +70,4 @@ class Parser:
                 result_dates.append(datetime.date.today().replace(
                     month=int(groups[1]), day=int(groups[0])))
         return result_dates
+
