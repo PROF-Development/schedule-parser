@@ -4,7 +4,7 @@ import re
 from pydantic import field_validator
 from pydantic.dataclasses import dataclass
 
-from app.schemas.enums import SubgroupType, LessonType
+from schedule_parser.schemas.enums import SubgroupType, LessonType
 
 
 @dataclass

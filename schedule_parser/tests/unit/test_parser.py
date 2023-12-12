@@ -1,7 +1,7 @@
 from datetime import date
 
-from app.schedule_parser import Parser
-from app.schemas.lesson import Lesson
+from schedule_parser import Parser
+from schedule_parser.schemas.lesson import Lesson
 
 
 def create_date(dat: str) -> date:
