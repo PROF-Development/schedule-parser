@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime
 import re
 
 from pydantic import field_validator
@@ -9,16 +9,10 @@ from schedule_parser.schemas.enums import SubgroupType, LessonType
 
 @dataclass
 class Lesson:
-    date: date
-    time: str
+    datetime_start: datetime
+    datetime_end: datetime
     lesson: str
     professor: str | None
     type: LessonType
     subgroup: SubgroupType | None
     auditory: str | None
-
-    @field_validator('time')
-    def validate_time(cls, v):
-        if not re.match(r'\d{1,2}:\d{2} - \d{2}:\d{2}',v):
-            raise ValueError('Time format must fit HH:MM - HH:MM')
-        return v

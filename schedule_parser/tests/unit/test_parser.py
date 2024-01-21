@@ -63,7 +63,7 @@ def test_date_parsing():
                         [create_date('01.09')],
                         [create_date('11.08')]]
     for test_date, expected in zip(test_dates, expected_results):
-        assert Parser.parse_date(test_date) == expected
+        assert list(map(lambda x: x.date(), Parser.parse_date(test_date))) == expected
 
 
 def test_lesson_parsing():

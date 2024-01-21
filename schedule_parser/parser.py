@@ -41,10 +41,16 @@ class Parser:
                     time = cls.times[time_index-1].split(
                         '-')[0] + '-' + cls.times[time_index].split('-')[1]
                 if time_index:
-                    lessons.extend([(date, time, lesson, professor, type,
-                                     subgroup, auditory) for date in cls.parse_date(dates)])
+                    hour_start, minute_start, hour_end, minute_end = [int(value) for part in time.split('-') for value in part.split(':')]
+                    lessons.extend([(date.replace(hour=hour_start, minute=minute_start),
+                                     date.replace(hour=hour_end, minute=minute_end),
+                                     lesson,
+                                     professor,
+                                     type,
+                                     subgroup,
+                                     auditory) for date in cls.parse_date(dates)])
                 else:
-                    lessons.extend([(date, lesson, professor, type,
+                    lessons.extend([(date.date(), lesson, professor, type,
                                      subgroup, auditory) for date in cls.parse_date(dates)])
                 object = object[res.end()+1:]
         return lessons
@@ -56,15 +62,15 @@ class Parser:
         for el in dates:
             if 'к.н' in el or 'ч.н' in el:
                 groups = cls.dates_regex.search(el).groups()
-                start = datetime.date.today().replace(
+                start = datetime.datetime.today().replace(
                     month=int(groups[1]), day=int(groups[0]))
-                end = datetime.date.today().replace(
+                end = datetime.datetime.today().replace(
                     month=int(groups[3]), day=int(groups[2]))
                 period = 7 if 'к.н' in groups[4] else 14
                 result_dates.extend([start + datetime.timedelta(days=i)
                                     for i in range(0, (end-start).days+1, period)])
             else:
                 groups = cls.single_date_regex.search(el).groups()
-                result_dates.append(datetime.date.today().replace(
+                result_dates.append(datetime.datetime.today().replace(
                     month=int(groups[1]), day=int(groups[0])))
         return result_dates
