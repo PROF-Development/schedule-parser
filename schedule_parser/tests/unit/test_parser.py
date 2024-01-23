@@ -1,25 +1,25 @@
-from datetime import date
+from datetime import datetime
 
 from schedule_parser import Parser
-from schedule_parser.schemas.lesson import Lesson
 
 
-def create_date(dat: str) -> date:
+def create_date(dat: str) -> datetime:
     day, month = map(int, dat.split('.'))
-    return date.today().replace(month=month, day=day)
+    year = datetime.today().year
+    return datetime(year=year, month=month, day=day)
 
 
 def test_pdf_reading():
     parser = Parser()
     path_to_mock_pdf = 'test.pdf'
-    assert parser.read(path_to_mock_pdf)
+    parser.read(path_to_mock_pdf)
 
 
 def test_pdf_parsing():
     parser = Parser()
     path_to_mock_pdf = 'test.pdf'
     parser.read(path_to_mock_pdf)
-    result = [Lesson(*lesson) for lesson in parser.parse()]
+    result = parser.parse()
     test_lessons = ['Проектирование информационных систем',
                     'Методы и алгоритмы теории игр',
                     'DevOps',
@@ -53,6 +53,7 @@ def test_pdf_parsing():
     for lesson in result:
         assert lesson.professor != ''
         assert lesson.auditory != ''
+        assert lesson.group is not None
 
 
 def test_date_parsing():
@@ -63,7 +64,7 @@ def test_date_parsing():
                         [create_date('01.09')],
                         [create_date('11.08')]]
     for test_date, expected in zip(test_dates, expected_results):
-        assert list(map(lambda x: x.date(), Parser.parse_date(test_date))) == expected
+        assert Parser.parse_date(test_date) == expected
 
 
 def test_lesson_parsing():
@@ -80,33 +81,33 @@ def test_lesson_parsing():
                     'Предмет. Предмет. Аль Хури А. лекции. 311. [11.03]',
                     'Предмет. Предмет. Предмет. Юсуф А. лекции. 311. [11.03]',
                     'Предмет. Предмет. Предмет. Юсуф А В Ф Ы А. лекции. 311. [11.03]']
-    expected_results = [[(create_date('11.03'), 'Математика', 'Некто А.В.', 'лекции', None, 'Фрезер 310'),
+    expected_results = [[(create_date('11.03'), 'Математика', 'Некто А.В.', 'лекции', None, 'Фрезер 310',''),
                          (create_date('18.03'), 'Математика',
-                          'Некто А.В.', 'лекции', None, 'Фрезер 310'),
-                         (create_date('25.05'), 'Математика', 'Некто А.В.', 'лекции', None, 'Фрезер 310')],
-                        [(create_date('21.03'), 'Физика', None, 'лекции', None, 'СЗ Станкин'),
+                          'Некто А.В.', 'лекции', None, 'Фрезер 310',''),
+                         (create_date('25.05'), 'Математика', 'Некто А.В.', 'лекции', None, 'Фрезер 310','')],
+                        [(create_date('21.03'), 'Физика', None, 'лекции', None, 'СЗ Станкин',''),
                          (create_date('22.03'), 'Физика',
-                          None, 'лекции', None, 'СЗ Станкин'),
-                         (create_date('25.05'), 'Физика', None, 'лекции', None, 'СЗ Станкин')],
-                        [(create_date('11.03'), 'Базы данных', None, 'лекции', None, None),
+                          None, 'лекции', None, 'СЗ Станкин',''),
+                         (create_date('25.05'), 'Физика', None, 'лекции', None, 'СЗ Станкин','')],
+                        [(create_date('11.03'), 'Базы данных', None, 'лекции', None, None,''),
                          (create_date('25.03'), 'Базы данных',
-                          None, 'лекции', None, None),
-                         (create_date('18.08'), 'Базы данных', None, 'лекции', None, None)],
+                          None, 'лекции', None, None,''),
+                         (create_date('18.08'), 'Базы данных', None, 'лекции', None, None,'')],
                         [(create_date('15.05'), 'Дифференциальные уравнения',
-                          'Немо В.Д.', 'семинар', None, None)],
+                          'Немо В.Д.', 'семинар', None, None,'')],
                         [(create_date('15.05'), 'Дифференциальные уравнения',
-                          'Немо В.Д.', 'лабораторные занятия', 'А', None)],
+                          'Немо В.Д.', 'лабораторные занятия', 'А', None,'')],
                         [(create_date('15.05'), 'Дифференциальные уравнения',
-                          'Немо В.Д.', 'лабораторные занятия', 'А', '311')],
+                          'Немо В.Д.', 'лабораторные занятия', 'А', '311','')],
                         [(create_date('11.01'), 'Базы данных',
-                          'Бычков С.Ю.', 'семинар', None, None)],
+                          'Бычков С.Ю.', 'семинар', None, None,'')],
                         [(create_date('11.01'), 'Базы данных', 'Бычков С.Ю.',
-                          'лабораторные занятия', 'А', None)],
+                          'лабораторные занятия', 'А', None,'')],
                         [(create_date('11.01'), 'Базы данных', 'Бычков С.Ю.',
-                          'лабораторные занятия', None, None)],
-                        [(create_date('11.01'), 'Базы данных', 'Бычков С.Ю.', 'лабораторные занятия', None, 'Фрезер 303(ММ)')],
-                        [(create_date('11.03'), 'Предмет. Предмет', 'Аль Хури А.', 'лекции', None, '311')],
-                        [(create_date('11.03'), 'Предмет. Предмет. Предмет', 'Юсуф А.', 'лекции',None,'311')],
-                        [(create_date('11.03'), 'Предмет. Предмет. Предмет', 'Юсуф А В Ф Ы А.', 'лекции',None,'311')]]
+                          'лабораторные занятия', None, None,'')],
+                        [(create_date('11.01'), 'Базы данных', 'Бычков С.Ю.', 'лабораторные занятия', None, 'Фрезер 303(ММ)','')],
+                        [(create_date('11.03'), 'Предмет. Предмет', 'Аль Хури А.', 'лекции', None, '311','')],
+                        [(create_date('11.03'), 'Предмет. Предмет. Предмет', 'Юсуф А.', 'лекции',None,'311','')],
+                        [(create_date('11.03'), 'Предмет. Предмет. Предмет', 'Юсуф А В Ф Ы А.', 'лекции',None,'311','')]]
     for test_lesson, expected in zip(test_lessons, expected_results):
         assert Parser.items(test_lesson) == expected
