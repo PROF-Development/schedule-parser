@@ -1,7 +1,5 @@
 from datetime import datetime
-import re
 
-from pydantic import field_validator
 from pydantic.dataclasses import dataclass
 
 from schedule_parser.schemas.enums import SubgroupType, LessonType
@@ -16,3 +14,4 @@ class Lesson:
     type: LessonType
     subgroup: SubgroupType | None
     auditory: str | None
+    group: str
