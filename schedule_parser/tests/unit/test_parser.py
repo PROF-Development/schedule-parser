@@ -1,7 +1,14 @@
 from datetime import datetime
+import os
+
+import pytest
+from unittest.mock import Mock, patch
 
 from schedule_parser import Parser
+from schedule_parser.exceptions.errors import PDFNotFoundError, InvalidPDFError
 
+current_dir = os.path.dirname(__file__)
+path_to_mock_pdf = os.path.join(current_dir, "test.pdf")
 
 def create_date(dat: str) -> datetime:
     day, month = map(int, dat.split('.'))
@@ -9,41 +16,46 @@ def create_date(dat: str) -> datetime:
     return datetime(year=year, month=month, day=day)
 
 
-def test_pdf_reading():
+def test_pdf_not_found_error():
     parser = Parser()
-    path_to_mock_pdf = 'test.pdf'
-    parser.read(path_to_mock_pdf)
+    non_existent_path = "non_exist.pdf"
+    with pytest.raises(PDFNotFoundError) as e:
+        parser.parse(non_existent_path)
+    
+    assert str(e.value) == f"Файл расписания не найден: {non_existent_path}"
+
+
+@patch('pdfplumber.open')
+def test_invalid_pdf_error(mock_pdf_open):
+    mock_pdf = Mock()
+    mock_page = Mock()
+    mock_page.extract_table.return_value = None
+    mock_pdf.pages = [mock_page]
+    mock_pdf_open.return_value = mock_pdf
+    
+    parser = Parser()
+    with pytest.raises(InvalidPDFError) as e:
+        parser.parse(path_to_mock_pdf)
+
+    assert str(e.value) == "Не валидный PDF файл"
+
 
 
 def test_pdf_parsing():
     parser = Parser()
-    path_to_mock_pdf = 'test.pdf'
-    parser.read(path_to_mock_pdf)
-    result = parser.parse()
-    test_lessons = ['Проектирование информационных систем',
-                    'Методы и алгоритмы теории игр',
-                    'DevOps',
-                    'Базы данных',
-                    'Основы Web-технологий',
-                    'Прикладная физическая культура',
-                    'Теория конечных автоматов',
-                    'Теория вероятностей, математическая статистика и случайные процессы',
-                    'Машинное обучение и интеллектуальные системы',
-                    'Моделирование и анализ бизнес-процессов']
-    test_professors = ['Елисеева Н.В.',
-                       'Елисеева Ю.В.',
-                       'Сосенушкин С.Е.',
-                       'Бычков С.Ю.',
-                       'Подвигина Е.А.',
-                       'Бекмурзаев В.А.',
-                       'Владимиров А.Л.',
-                       'Ибатулин М.Ю.',
-                       'Бычкова Н.А.',
-                       'Коробов Н.А.',
-                       None]
-    test_auditory = ['311', '0811', '308', '209', '450', '0806', 'С/З СТАНКИН 1',
-                     '0402', '0411', '0303', '214', '357(з)', '235(и)', '235(з)',
-                     '235(д)', 'Фрезер 303 (ММ)']
+    result = parser.parse(path_to_mock_pdf)
+    test_lessons = [
+        "Иностранный язык", "История России", "Философия", "Основы военной подготовки",
+        "Математическая логика и теория алгоритмов", "Объектно-ориентированное программирование", "Физика",
+        "Компьютерная графика и геометрия", "Прикладная физическая культура", "Аналитика данных и методы ИИ", "Архитектура ЭВМ и вычислительных систем"
+    ]
+    test_professors = [
+        "Косова И.О.", "Лузгина Ю.С.", "Шитов С.Б.",  "Красикова Е.М.", "Елисеева Ю.В.",
+        "Варварюк А.В.", "Бельченко Ф.М.", "Лоскутов А.И.", "Терехов В.А.", "Саркисова И.О.", "Алешин В.И."
+    ]
+    test_auditory = [
+        "238", "0805", "Фрезер 303 ОВП", "0408", "Актовый зал 1", "Стадион 2", "408", "235(з)"
+    ]
     for lesson in test_lessons:
         assert lesson in [lesson.lesson for lesson in result]
     for professor in test_professors:
