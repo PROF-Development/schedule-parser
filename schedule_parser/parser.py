@@ -27,8 +27,8 @@ class Parser:
             raise InvalidPDFError()
         
         result = []
-        for row in self.table:
-            for time_index, cell_content in enumerate(row):
+        for row in self.table[1:]:
+            for time_index, cell_content in enumerate(row[1:], 1):
                 if not cell_content:
                     continue
                     
