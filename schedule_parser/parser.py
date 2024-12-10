@@ -20,21 +20,21 @@ class Parser:
     def parse(self, path: str) -> list[Lesson]:
         if not os.path.exists(path):
             raise PDFNotFoundError(path)
-        
+
         self.group = os.path.basename(path).split('.pdf')[0]
         self.table = pdfplumber.open(path).pages[0].extract_table()
         if not self.table:
             raise InvalidPDFError()
-        
+
         result = []
         for row in self.table[1:]:
             for time_index, cell_content in enumerate(row[1:], 1):
                 if not cell_content:
                     continue
-                    
+
                 lessons = self.items(cell_content, time_index, self.group)
                 result.extend(lessons)
-        
+
         return [Lesson(*lesson_data) for lesson_data in result]
 
     @classmethod
@@ -44,10 +44,10 @@ class Parser:
             while res := cls.lesson_regex.search(object.replace('\n', ' ')):
                 lesson, professor, type, subgroup, auditory, dates = res.groups()
                 if type == 'лабораторные занятия':
-                    time = cls.times[time_index-1].split(
+                    time = cls.times[time_index - 1].split(
                         '-')[0] + '-' + cls.times[time_index].split('-')[1]
                 else:
-                    time = cls.times[time_index-1]
+                    time = cls.times[time_index - 1]
                 if time_index:
                     hour_start, minute_start, hour_end, minute_end = [
                         int(value) for part in time.split('-') for value in part.split(':')]
@@ -69,7 +69,7 @@ class Parser:
                                      auditory,
                                      group,
                                      ) for date in cls.parse_date(dates)])
-                object = object[res.end()+1:]
+                object = object[res.end() + 1:]
         return lessons
 
     @classmethod
@@ -92,8 +92,8 @@ class Parser:
                 )
                 step = 7 if 'к.н' in period else 14
                 result_dates.extend([start + datetime.timedelta(days=i)
-                                    for i in range(0, (end-start).days+1, step)])
-            else:     
+                                    for i in range(0, (end - start).days + 1, step)])
+            else:
                 day, month = cls.single_date_regex.search(el).groups()
                 result_dates.append(datetime.datetime(
                     year=year,

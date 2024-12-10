@@ -1,5 +1,5 @@
 class InvalidPDFError(Exception):
-    def __init__(self, message="Не валидный PDF файл"):
+    def __init__(self, message='Не валидный PDF файл'):
         self.message = message
         super().__init__(self.message)
 
