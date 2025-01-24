@@ -1,6 +1,5 @@
 from datetime import datetime
 import re
-from typing import Optional
 
 from pydantic.dataclasses import dataclass
 from pydantic import field_validator
@@ -9,7 +8,7 @@ from schedule_parser.schemas.enums import SubgroupType, LessonType
 
 lesson_regex: re.Pattern = re.compile(r'^[А-Яа-яЁё\s,-]+$')
 professor_regex: re.Pattern = re.compile(r'^[А-ЯЁ][а-яё-]+ [А-ЯЁ]\.(?:[А-ЯЁ]\.)?$')
-auditory_regex = re.compile(r'^(?:[А-Яа-яЁё\s]*\d+(?:\(\w+\))?(?:\s[А-Яа-яЁё\d]*)*|ИГ-\d+)$')
+auditory_regex: re.Pattern = re.compile(r'^(?:[А-Яа-яЁё\s]*\d+(?:\(\w+\))?(?:\s[А-Яа-яЁё\d]*)*|ИГ-\d+)$')  # Доработать регексу
 
 
 @dataclass
@@ -17,10 +16,10 @@ class Lesson():
     datetime_start: datetime
     datetime_end: datetime
     lesson: str
-    professor: Optional[str]
+    professor: str | None
     type: LessonType
-    subgroup: Optional[SubgroupType]
-    auditory: Optional[str]
+    subgroup: SubgroupType | None
+    auditory: str | None
     group: str
 
     @field_validator('datetime_end')
