@@ -1,10 +1,12 @@
-from datetime import datetime
 import os
-
-import pytest
+from datetime import datetime
 from unittest.mock import Mock, patch
 
+import pytest
+from pydantic_core import ValidationError
+
 from schedule_parser import Parser
+from schedule_parser.schemas.lesson import Lesson
 from schedule_parser.exceptions.errors import PDFNotFoundError, InvalidPDFError
 
 current_dir = os.path.dirname(__file__)
@@ -17,6 +19,23 @@ def create_date(dat: str) -> datetime:
     return datetime(year=year, month=month, day=day)
 
 
+def test_lesson_validation_error():
+    with pytest.raises(ValidationError) as e:
+        Lesson(datetime_start=datetime(2025, 12, 21, 16, 10),
+               datetime_end=datetime(2025, 12, 21, 15, 50),
+               lesson='Иностранный язык2',
+               professor='Косова И.О',
+               type='семинар',
+               subgroup=None,
+               auditory='238asd',
+               group='test')
+
+    assert 'должна быть меньше даты окончания' in str(e.value)
+    assert 'Неверный формат названия занятия' in str(e.value)
+    assert 'Неверный формат имени преподавателя' in str(e.value)
+    assert 'Неверный формат номера аудитории' in str(e.value)
+
+    
 def test_pdf_not_found_error():
     parser = Parser()
     non_existent_path = 'non_exist.pdf'

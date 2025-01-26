@@ -3,7 +3,9 @@ import os
 import re
 
 import pdfplumber
+from pydantic_core import ValidationError
 
+from schedule_parser.exceptions.errors import LessonValidationError
 from schedule_parser.schemas.lesson import Lesson
 from schedule_parser.exceptions.errors import InvalidPDFError, PDFNotFoundError
 
@@ -35,7 +37,15 @@ class Parser:
                 lessons = self.items(cell_content, time_index, self.group)
                 result.extend(lessons)
 
-        return [Lesson(*lesson_data) for lesson_data in result]
+        validated_lessons = []
+        for lesson_data in result:
+            try:
+                validated_lessons.append(Lesson(*lesson_data))
+            except ValidationError as e:
+                error_type = ', '.join([err['type'] for err in e.errors()])
+                raise LessonValidationError(error_type, lesson_data) from e
+
+        return validated_lessons
 
     @classmethod
     def items(cls, object: str, time_index: int = 0, group: str = '') -> list[tuple]:
