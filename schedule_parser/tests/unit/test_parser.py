@@ -1,11 +1,13 @@
-from datetime import datetime
 import os
+from datetime import datetime
+from unittest.mock import Mock, patch
 
-from pydantic_core import ValidationError
 import pytest
+from pydantic_core import ValidationError
 
 from schedule_parser import Parser
 from schedule_parser.schemas.lesson import Lesson
+from schedule_parser.exceptions.errors import PDFNotFoundError, InvalidPDFError
 
 current_dir = os.path.dirname(__file__)
 path_to_mock_pdf = os.path.join(current_dir, 'test.pdf')
@@ -32,6 +34,30 @@ def test_lesson_validation_error():
     assert 'Неверный формат названия занятия' in str(e.value)
     assert 'Неверный формат имени преподавателя' in str(e.value)
     assert 'Неверный формат номера аудитории' in str(e.value)
+
+    
+def test_pdf_not_found_error():
+    parser = Parser()
+    non_existent_path = 'non_exist.pdf'
+    with pytest.raises(PDFNotFoundError) as e:
+        parser.parse(non_existent_path)
+
+    assert str(e.value) == f'Файл расписания не найден: {non_existent_path}'
+
+
+@patch('pdfplumber.open')
+def test_invalid_pdf_error(mock_pdf_open):
+    mock_pdf = Mock()
+    mock_page = Mock()
+    mock_page.extract_table.return_value = None
+    mock_pdf.pages = [mock_page]
+    mock_pdf_open.return_value = mock_pdf
+
+    parser = Parser()
+    with pytest.raises(InvalidPDFError) as e:
+        parser.parse(path_to_mock_pdf)
+
+    assert str(e.value) == 'Не валидный PDF файл'
 
 
 def test_pdf_parsing():
