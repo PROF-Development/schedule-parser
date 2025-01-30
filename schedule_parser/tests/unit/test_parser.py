@@ -8,6 +8,7 @@ from pydantic_core import ValidationError
 from schedule_parser import Parser
 from schedule_parser.schemas.lesson import Lesson
 from schedule_parser.exceptions.errors import PDFNotFoundError, InvalidPDFError
+from schedule_parser.schemas.lesson import lesson_regex, professor_regex, auditory_regex
 
 current_dir = os.path.dirname(__file__)
 path_to_mock_pdf = os.path.join(current_dir, 'test.pdf')
@@ -19,15 +20,95 @@ def create_date(dat: str) -> datetime:
     return datetime(year=year, month=month, day=day)
 
 
+def test_lesson_regex():
+    valid_lessons = [
+        'Информационные технологии',
+        'Управление техническими системами',
+        'Физическая культура и спорт',
+        'Русский язык (как иностранный)',
+        'DevOps',
+        'CAD-системы',
+        'Сервисная робототехника: роботы в медицинских системах',
+        'Оборудование цифровых производств. Интегрированные роботизированные системы',
+        'Интегрированные CAE системы в машиностроении'
+    ]
+
+    for lesson in valid_lessons:
+        assert lesson_regex.fullmatch(lesson)
+
+
+def test_professor_regex():
+    valid_professors = [
+        'Юсеф Фарах',
+        'Амир Абдаллах Д. А.',
+        'Мягков А.С.',
+        'Римский-Корсаков А.Л.',
+        'Гайбу В.'
+    ]
+
+    invalid_professors = [
+        'Юсеф Farax ',
+        'Мягков А.С'
+    ]
+
+    for professor in valid_professors:
+        assert professor_regex.fullmatch(professor)
+
+    for professor in invalid_professors:
+        assert not professor_regex.fullmatch(professor)
+
+
+def test_auditory_regex():
+    valid_auditories = [
+        'Фрезер 303 (ММ)',
+        'Фрезер 216 (ТП)',
+        'Фрезер С/З',
+        '235(в) - ТехП6',
+        '216',
+        '346/1',
+        '346/4',
+        '346/6',
+        '501-7',
+        '235(в) - ТехП6',
+        'Фрезер 307',
+        'Фрезер 203 (КК)',
+        'РГГУ',
+        '0803',
+        'ТехП7',
+        '442',
+        'Актовый зал 1',
+        'Стадион 2',
+        'Фрезер 303 ОВП',
+        'ИГ-1',
+        'ТехП6(ГПА)',
+        'Фрезер С/З 2'
+    ]
+
+    invalid_auditories = [
+        'Фрезер - ',
+        '304-',
+        '-3',
+        '345/',
+        '/3',
+        '135.4'
+    ]
+
+    for auditory in valid_auditories:
+        assert auditory_regex.fullmatch(auditory)
+
+    for auditory in invalid_auditories:
+        assert not auditory_regex.fullmatch(auditory)
+
+
 def test_lesson_validation_error():
     with pytest.raises(ValidationError) as e:
         Lesson(datetime_start=datetime(2025, 12, 21, 16, 10),
                datetime_end=datetime(2025, 12, 21, 15, 50),
-               lesson='Иностранный язык2',
+               lesson='Иностранный язык\\',
                professor='Косова И.О',
                type='семинар',
                subgroup=None,
-               auditory='238asd',
+               auditory='Фрезер -',
                group='test')
 
     assert 'должна быть меньше даты окончания' in str(e.value)
@@ -35,7 +116,7 @@ def test_lesson_validation_error():
     assert 'Неверный формат имени преподавателя' in str(e.value)
     assert 'Неверный формат номера аудитории' in str(e.value)
 
-    
+
 def test_pdf_not_found_error():
     parser = Parser()
     non_existent_path = 'non_exist.pdf'

@@ -12,7 +12,7 @@ from schedule_parser.exceptions.errors import InvalidPDFError, PDFNotFoundError
 
 class Parser:
     lesson_regex = re.compile(
-        r'(.*?)\. ?([А-Я][^.]+ [А-Я]\.(?:[А-Я]\.)?)? (лекции|семинар|лабораторные занятия)(?:.*?(А|Б).*?)??\. ([^\.]*?)??\.? \[(.*?)\]')
+        r'(.*?)\. ?([А-Я][А-Яа-яЁё -]+(?:[А-Я]\.){0,2})? (лекции|семинар|лабораторные занятия)(?:.*?(А|Б).*?)??\. ([^\.]*?)??\.? \[(.*?)\]')
     dates_regex = re.compile(r'(\d{2})\.(\d{2})-(\d{2})\.(\d{2}) (ч.н.|к.н.)')
     single_date_regex = re.compile(r'(\d{2})\.(\d{2})')
     times = ['8:30 - 10:10', '10:20 - 12:00', '12:20 - 14:00',
@@ -53,7 +53,7 @@ class Parser:
         if object:
             while res := cls.lesson_regex.search(object.replace('\n', ' ')):
                 lesson, professor, type, subgroup, auditory, dates = res.groups()
-                if type == 'лабораторные занятия':
+                if type == 'лабораторные занятия' and time_index != len(cls.times):
                     time = cls.times[time_index - 1].split(
                         '-')[0] + '-' + cls.times[time_index].split('-')[1]
                 else:

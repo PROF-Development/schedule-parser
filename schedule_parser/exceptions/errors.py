@@ -1,5 +1,6 @@
 from schedule_parser.schemas.lesson import Lesson
 
+
 class InvalidPDFError(Exception):
     def __init__(self):
         super().__init__('Не валидный PDF файл')

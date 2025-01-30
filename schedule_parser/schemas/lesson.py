@@ -6,9 +6,10 @@ from pydantic import field_validator
 from pydantic_core import PydanticCustomError
 from schedule_parser.schemas.enums import SubgroupType, LessonType
 
-lesson_regex: re.Pattern = re.compile(r'^[А-Яа-яЁё\s,-]+$')
-professor_regex: re.Pattern = re.compile(r'^[А-ЯЁ][а-яё-]+ [А-ЯЁ]\.(?:[А-ЯЁ]\.)?$')
-auditory_regex: re.Pattern = re.compile(r'^(?:[А-Яа-яЁё\s]*\d+(?:\(\w+\))?(?:\s[А-Яа-яЁё\d]*)*|ИГ-\d+)$')  # Доработать регексу
+lesson_regex: re.Pattern = re.compile(r'^[A-Za-zА-Яа-яЁё0-9 .,:"\+\/\(\)-]+$')
+professor_regex: re.Pattern = re.compile(r'^[А-ЯЁ][А-Яа-яЁё-]+ (?: ?[А-ЯЁ]\.){1,2}|(?:[А-ЯЁ][А-Яа-яЁё-]+ ?){2,3}(?: ?[А-ЯЁ]\.){0,2}$')
+auditory_regex: re.Pattern = re.compile(
+    r'^(?:(?:[А-Яа-яЁё ]+)?(?:\d{1,4}(?:\/[\d])?(?:-[\d])?(?:\([а-я]\))?(?: *[-—] *[А-Яа-яЁё\d]+)?(?: *\([А-Яа-яЁё]+\))?(?: +[А-Яа-яЁё]+)?|С\/З(?: \d{1})?)|[А-Я]+|ИГ-\d+)$')
 
 
 @dataclass
@@ -34,7 +35,7 @@ class Lesson():
 
     @field_validator('lesson')
     def validate_lesson(cls, lesson):
-        if not lesson or len(lesson) > 150 or not lesson_regex.match(lesson):
+        if not lesson or len(lesson) > 150 or not lesson_regex.fullmatch(lesson):
             raise PydanticCustomError(
                 'invalid_lesson_format',
                 f'Неверный формат названия занятия: {lesson}'
@@ -43,7 +44,7 @@ class Lesson():
 
     @field_validator('professor')
     def validate_professor(cls, professor):
-        if professor and (len(professor) > 50 or not professor_regex.match(professor)):
+        if professor and (len(professor) > 50 or not professor_regex.fullmatch(professor)):
             raise PydanticCustomError(
                 'invalid_professor_format',
                 f'Неверный формат имени преподавателя: {professor}'
@@ -52,7 +53,7 @@ class Lesson():
 
     @field_validator('auditory')
     def validate_auditory(cls, auditory):
-        if auditory and not auditory_regex.match(auditory):
+        if auditory and not auditory_regex.fullmatch(auditory):
             raise PydanticCustomError(
                 'invalid_auditory_format',
                 f'Неверный формат номера аудитории: {auditory}'
