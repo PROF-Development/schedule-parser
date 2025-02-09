@@ -5,7 +5,7 @@ import re
 import pdfplumber
 from pydantic_core import ValidationError
 
-from schedule_parser.exceptions.errors import EmptyLessonsList, LessonValidationError
+from schedule_parser.exceptions.errors import EmptyLessonsListError, LessonValidationError
 from schedule_parser.schemas.lesson import Lesson
 from schedule_parser.exceptions.errors import InvalidPDFError, PDFNotFoundError
 
@@ -46,7 +46,7 @@ class Parser:
                 raise LessonValidationError(error_type, lesson_data) from e
             
         if not validated_lessons:
-            raise EmptyLessonsList()
+            raise EmptyLessonsListError()
 
         return validated_lessons
 
