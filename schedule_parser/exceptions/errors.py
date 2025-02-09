@@ -16,3 +16,8 @@ class LessonValidationError(Exception):
         self.error_type = error_type
         self.lesson_data = lesson_data
         super().__init__(f'Type: \'{error_type}\', Lesson: {lesson_data}')
+
+
+class EmptyLessonsList(Exception):
+    def __init__(self):
+        super().__init__(f'Cписок занятий пустой')
