@@ -5,14 +5,14 @@ import re
 import pdfplumber
 from pydantic_core import ValidationError
 
-from schedule_parser.exceptions.errors import LessonValidationError
+from schedule_parser.exceptions.errors import EmptyLessonsListError, LessonValidationError
 from schedule_parser.schemas.lesson import Lesson
 from schedule_parser.exceptions.errors import InvalidPDFError, PDFNotFoundError
 
 
 class Parser:
     lesson_regex = re.compile(
-        r'(.*?)\. ?([А-Я][А-Яа-яЁё -]+(?:[А-Я]\.){0,2})? (лекции|семинар|лабораторные занятия)(?:.*?(А|Б).*?)??\. ([^\.]*?)??\.? \[(.*?)\]')
+        r'(.*?)\. ?([А-Я][А-Яа-яЁё -]+(?:[А-Я]\.){0,2}|_Вакансия)? (лекции|семинар|лабораторные занятия)(?:.*?(А|Б).*?)??\. ([^\.]*?)??\.? \[(.*?)\]')
     dates_regex = re.compile(r'(\d{2})\.(\d{2})-(\d{2})\.(\d{2}) (ч.н.|к.н.)')
     single_date_regex = re.compile(r'(\d{2})\.(\d{2})')
     times = ['8:30 - 10:10', '10:20 - 12:00', '12:20 - 14:00',
@@ -44,6 +44,9 @@ class Parser:
             except ValidationError as e:
                 error_type = ', '.join([err['type'] for err in e.errors()])
                 raise LessonValidationError(error_type, lesson_data) from e
+            
+        if not validated_lessons:
+            raise EmptyLessonsListError()
 
         return validated_lessons
 
