@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "schedule-parser"
-version = "0.1.3"
+version = "0.1.5"
 description = "Stankin Schedule PDF Parser"
 authors = ["PROF-Development"]
 readme = "README.md"
