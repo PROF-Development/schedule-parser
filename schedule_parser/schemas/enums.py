@@ -2,9 +2,9 @@ from enum import Enum
 
 
 class LessonType(str, Enum):
-    PRACTICE = 'семинар'
-    LECTURE = 'лекции'
-    LABORATORY = 'лабораторные занятия'
+    PRACTICE = 'Семинар'
+    LECTURE = 'Лекция'
+    LABORATORY = 'Лабораторная'
 
 
 class SubgroupType(str, Enum):
