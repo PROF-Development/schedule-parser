@@ -1,3 +1,3 @@
 from schedule_parser.parser import *
 
-version = "0.1.4"
+version = "0.1.5"
