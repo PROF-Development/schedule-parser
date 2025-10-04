@@ -59,7 +59,7 @@ class Parser:
                 lesson = lesson.strip()
                 auditory = auditory.strip() if auditory and auditory.strip() else None
                 professor = professor.strip() if professor and professor.strip() else None
-                if type == 'лабораторные занятия' and time_index != len(cls.times):
+                if type == 'Лабораторная' and time_index != len(cls.times):
                     time = cls.times[time_index - 1].split(
                         '-')[0] + '-' + cls.times[time_index].split('-')[1]
                 else:
