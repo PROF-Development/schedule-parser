@@ -19,6 +19,8 @@ class Parser:
              '14:10 - 15:50', '16:00 - 17:40', '18:00 - 19:30',
              '19:40 - 21:10', '21:20 - 22:50']
 
+    lesson_type_check = re.compile(r'Лекция|Семинар|Лабораторная')
+
     def parse(self, path: str) -> list[Lesson]:
         if not os.path.exists(path):
             raise PDFNotFoundError(path)
@@ -31,7 +33,7 @@ class Parser:
         result = []
         for row in self.table[1:]:
             for time_index, cell_content in enumerate(row[1:], 1):
-                if not cell_content:
+                if not cell_content or not self.lesson_type_check.search(cell_content):
                     continue
 
                 lessons = self.items(cell_content, time_index, self.group)
@@ -54,10 +56,10 @@ class Parser:
     def items(cls, object: str, time_index: int = 0, group: str = '') -> list[tuple]:
         lessons = []
         if object:
-            while res := cls.lesson_regex.search(object.replace('\n', ' ')):
+            while res := cls.lesson_regex.search(object.replace('-\n', '-').replace('\n', ' ')):
                 lesson, professor, type, subgroup, auditory, dates = res.groups()
                 lesson = lesson.strip()
-                auditory = auditory.strip() if auditory and auditory.strip() else None
+                auditory = auditory.strip().replace('\\', '/') if auditory and auditory.strip() else None
                 professor = professor.strip() if professor and professor.strip() else None
                 if type == 'Лабораторная' and time_index != len(cls.times):
                     time = cls.times[time_index - 1].split(
